@@ -25,6 +25,7 @@ import sn.permissions_security.security.CustomAuthenticationProvider;
 import sn.permissions_security.services.UserService;
 import sn.permissions_security.utils.JwtUtils;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ public class UserController {
             User userCreated = userService.saveNewUserWithRoles(new User(null,
                     user.getUsername(), user.getPassword(), null, null, null, null), user.getRoles());
             return ResponseEntity.ok(userCreated);
-        } catch (ClassNotFoundException | DataIntegrityViolationException exception) {
+        } catch (EntityNotFoundException | DataIntegrityViolationException exception) {
             exception.printStackTrace();
             Map<String, String> response = new HashMap<>();
             response.put("error:", exception.getMessage());

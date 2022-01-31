@@ -18,6 +18,7 @@ import sn.permissions_security.exceptions.BadRightsException;
 import sn.permissions_security.services.UserService;
 import sn.permissions_security.utils.JwtUtils;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -78,7 +79,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             } else {
                 throw new BadRightsException("You don't have permission to access to this resource");
             }
-        } catch (ClassNotFoundException | JwtException | BadRightsException exception) {
+        } catch (EntityNotFoundException | JwtException | BadRightsException exception) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             Map<String, String> errors = new HashMap<>();
             errors.put("error", exception.getMessage());
