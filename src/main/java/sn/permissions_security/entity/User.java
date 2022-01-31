@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.Collection;
 import java.util.Set;
 
 @Entity
@@ -30,7 +31,7 @@ public class User {
     @JoinTable(name = "users_privileges",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "privilege_id", referencedColumnName = "id"))
-    private Set<Privilege> privileges;
+    private Collection<Privilege> privileges;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organization_id", referencedColumnName = "id")

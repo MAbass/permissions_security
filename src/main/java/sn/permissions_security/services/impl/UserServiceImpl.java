@@ -14,11 +14,15 @@ import sn.permissions_security.repository.PrivilegeRepository;
 import sn.permissions_security.repository.UserRepository;
 import sn.permissions_security.services.UserService;
 
+import javax.transaction.Transactional;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(rollbackOn = ClassNotFoundException.class)
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final PrivilegeRepository privilegeRepository;
@@ -48,7 +52,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (user.isPresent()) {
             Optional<Privilege> privilege = privilegeRepository.findByName(role);
             if (privilege.isPresent()) {
-                Set<Privilege> privileges = user.get().getPrivileges();
+                Collection<Privilege> privileges = user.get().getPrivileges();
                 if (privileges == null) {
                     user.get().setPrivileges(new HashSet<>(Collections.singleton(privilege.get())));
                 } else {
@@ -74,5 +78,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ClassNotFoundException("The user is not found");
         }
     }
+
+    @Override
+    public User saveNewUserWithRoles(User user, List<String> roles) throws ClassNotFoundException {
+        AtomicReference<Boolean> error = new AtomicReference<>(false);
+        User userSaved = this.saveUser(user);
+        Collection<Privilege> privileges = roles.stream().map(role -> {
+            Optional<Privilege> privilege = this.privilegeRepository.findByName(role);
+            if (privilege.isPresent()) {
+                return privilege.get();
+            } else {
+                error.set(true);
+                return null;
+            }
+        }).collect(Collectors.toList());
+        if (error.get())
+            throw new ClassNotFoundException("The role is not found");
+        userSaved.setPrivileges(privileges);
+        return this.saveUser(user);
+    }
+
 
 }

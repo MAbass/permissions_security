@@ -45,12 +45,9 @@ public class UserController {
     @PostMapping("/register/user")
     public ResponseEntity<?> createUser(@RequestBody @Valid CreateNewUser user) {
         try {
-            User userCreated = userService.saveUser(new User(null,
-                    user.getUsername(), user.getPassword(), null, null, null, null));
-            for (String role : user.getRoles()) {
-                userService.addRoleToUser(userCreated.getUsername(), role);
-            }
-            return ResponseEntity.ok("User created");
+            User userCreated = userService.saveNewUserWithRoles(new User(null,
+                    user.getUsername(), user.getPassword(), null, null, null, null), user.getRoles());
+            return ResponseEntity.ok(userCreated);
         } catch (ClassNotFoundException | DataIntegrityViolationException exception) {
             exception.printStackTrace();
             Map<String, String> response = new HashMap<>();
